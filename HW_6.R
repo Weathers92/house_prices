@@ -43,15 +43,26 @@ pMissCol[pMissCol > 5]
 
 #View the variables which have missing values, but only up to 5%.
 pMissCol[0 < pMissCol & pMissCol < 5]
-#Out of the 8 variables in this list, "Electrical" for sure has missing values
-#and "BsmtExposure" and "BsmtFinType2" might have missing values.
+#Out of the 8 variables in this list, "MasVnrType", "MasVnrArea", "BsmtExposure", 
+#"BsmtFinType2", and "Electrical" have missing values.
 
-#Possible amount of missing values for both of these variables is 0.06849315%.
-#This is the same amount as "Electrical".
-pMissCol[0 < pMissCol & pMissCol < 5][5] - pMissCol[0 < pMissCol & pMissCol < 5][4]
+#Percentage of missing values for both "BsmtExposure" and "BsmtFinType2" is 0.06849315%.
+#This is the same percentage as "Electrical".
+percentMiss <- pMissCol[0 < pMissCol & pMissCol < 5][5] - pMissCol[0 < pMissCol & pMissCol < 5][4]
 
-#Before seeing how many missing values are in each row, we will want recode
+#There is only 1 row which has a basement but has a missing value for "BsmtExposure" and "BsmtFinType2".
+nrow(train) * (percentMiss/100)
+
+#This is the 949th observation.
+train[which(!is.na(train$BsmtCond) & is.na(train$BsmtExposure))][[1]]
+
+#The 1380th observations is the one row with a missing electrical value.
+train[which(is.na(train$Electrical))][[1]]
+
+#Before seeing how many missing values are in each row, we will want to recode
 #the NA's in the variables which NA's should not be treated as missing values.
+
+
 
 #
 (pMissRow <- apply(train, 1, pMiss))
