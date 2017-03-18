@@ -43,7 +43,7 @@ pMissCol[pMissCol > 5]
 
 #View the variables which have missing values, but only up to 5%.
 pMissCol[0 < pMissCol & pMissCol < 5]
-#Out of the 8 variables in this list, "MasVnrType", "MasVnrArea", "BsmtExposure", 
+f#Out of the 8 variables in this list, "MasVnrType", "MasVnrArea", "BsmtExposure", 
 #"BsmtFinType2", and "Electrical" have missing values.
 
 #Percentage of missing values for both "BsmtExposure" and "BsmtFinType2" is 0.06849315%.
@@ -54,20 +54,46 @@ percentMiss <- pMissCol[0 < pMissCol & pMissCol < 5][5] - pMissCol[0 < pMissCol 
 nrow(train) * (percentMiss/100)
 
 #This is the 949th observation.
-train[which(!is.na(train$BsmtCond) & is.na(train$BsmtExposure))][[1]]
+index1 <- train[which(!is.na(train$BsmtCond) & is.na(train$BsmtExposure))][[1]]
 
 #The 1380th observations is the one row with a missing electrical value.
-train[which(is.na(train$Electrical))][[1]]
+index2 <- train[which(is.na(train$Electrical))][[1]]
 
 #Before seeing how many missing values are in each row, we will want to recode
 #the NA's in the variables which NA's should not be treated as missing values.
 
+train$Alley[is.na(train$Alley)] <- "none"
+train$FireplaceQu[is.na(train$FireplaceQu)] <- "none"
+train$GarageType[is.na(train$GarageType)] <- "none"
+train$GarageYrBlt[is.na(train$GarageYrBlt)] <- "none"
+train$GarageFinish[is.na(train$GarageFinish)] <- "none"
+train$GarageQual[is.na(train$GarageQual)] <- "none"
+train$GarageCond[is.na(train$GarageCond)] <- "none"
+train$PoolQC[is.na(train$PoolQC)] <- "none"
+train$Fence[is.na(train$Fence)] <- "none"
+train$MiscFeature[is.na(train$MiscFeature)] <- "none"
+train$BsmtQual[is.na(train$BsmtQual)] <- "none"
+train$BsmtCond[is.na(train$BsmtCond)] <- "none"
+train$BsmtFinType1[is.na(train$BsmtFinType1)] <- "none"
 
+train$BsmtExposure[is.na(train$BsmtExposure)] <- "none"
+train$BsmtExposure[[index1]] <- NA
 
-#
-(pMissRow <- apply(train, 1, pMiss))
-max(pMissRow)
+train$BsmtFinType2[is.na(train$BsmtFinType2)] <- "none"
+train$BsmtFinType2[[index1]] <- NA
 
+for(i in 1:ncol(train))
+{
+  if(class(train[[i]]) == "character")
+  {
+    train[[i]] <- as.factor(train[[i]])
+  }
+}
 
 library(mice)
-md.pattern(train)
+imputeTrain <- mice(train, m = 5, method = 'rf')
+
+completedTrain <- complete(imputeTrain, 1)
+
+
+
