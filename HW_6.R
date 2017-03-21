@@ -236,4 +236,15 @@ imputeTest <- mice(test, m = 5, method = 'rf', seed = 0692)
 
 completedTest <- complete(imputeTest, 1)
 
+####################
+### LINEAR MODEL ###
+####################
+
+lm7 = lm(formula = SalePrice ~ OverallQual + GrLivArea + Neighborhood + 
+           ExterQual + TotalBsmtSF + GarageCars + sfFlr1, data = completedTrain)
+summary(lm7)
+MSE7 <- mean(lm7$residuals^2)
+MSE7
+
+
 
