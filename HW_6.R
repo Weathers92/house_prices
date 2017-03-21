@@ -232,8 +232,8 @@ train$GarageYrBlt = as.numeric(train$GarageYrBlt)
 
 #Imputed the missing values in the train data using random forests.
 
-imputeTrain2 <- mice(test, m = 5, method = 'rf', seed = 0692)
+imputeTest <- mice(test, m = 5, method = 'rf', seed = 0692)
 
-completedTrain2 <- complete(imputeTrain2, 1)
+completedTest <- complete(imputeTest, 1)
 
 
