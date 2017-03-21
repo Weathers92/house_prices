@@ -150,3 +150,90 @@ library(randomForest)
 price.rf <- randomForest(SalePrice ~ ., importance = TRUE, data = completedTrain[, 2:81])
 varImpPlot(price.rf, scale = FALSE)
 
+################################
+### SETTING UP THE TEST DATA ###
+################################
+#Apply the above function to the columns of the training set.
+(pMissCol2 <- apply(test, 2, pMiss))
+
+#Variables we need to impute for: MSZoning(C), LotFrontage, Utilities(C), Exterior1st(C), 
+#Exterior2nd(C), MasVnrType, MasVnrArea, 
+
+(below5 <- pMissCol2[0 < pMissCol2 & pMissCol2 <= 5])
+(above5 <- pMissCol2[pMissCol2 > 5])
+
+index3 <- test[which(!is.na(test$MasVnrArea) & is.na(test$MasVnrType))][[1]] - (nrow(test) + 1)
+
+index4 <- test[which(!is.na(test$BsmtExposure) & is.na(test$BsmtCond))][[1]] - (nrow(test) + 1)
+
+index5 <- test[which(is.na(test$BsmtFinSF1))][[1]] - (nrow(test) + 1)
+
+index6 <- test[which(!is.na(test$BsmtFinSF1) & is.na(test$BsmtFullBath))][[1]] - (nrow(test) + 1)
+
+index7 <- test[which(!is.na(test$GarageType) & is.na(test$GarageYrBlt) & is.na(test$GarageFinish) & is.na(test$GarageQual)& is.na(test$GarageCond))][[1]] - (nrow(test) +1)
+
+test$Alley[is.na(test$Alley)] <- "none"
+test$FireplaceQu[is.na(test$FireplaceQu)] <- "none"
+test$GarageType[is.na(test$GarageType)] <- "none"
+test$GarageYrBlt[is.na(test$GarageYrBlt)] <- 0
+test$GarageFinish[is.na(test$GarageFinish)] <- "none"
+test$GarageQual[is.na(test$GarageQual)] <- "none"
+test$GarageCond[is.na(test$GarageCond)] <- "none"
+test$PoolQC[is.na(test$PoolQC)] <- "none"
+test$Fence[is.na(test$Fence)] <- "none"
+test$MiscFeature[is.na(test$MiscFeature)] <- "none"
+test$BsmtQual[is.na(test$BsmtQual)] <- "none"
+test$BsmtCond[is.na(test$BsmtCond)] <- "none"
+test$BsmtFinType1[is.na(test$BsmtFinType1)] <- "none"
+test$BsmtFinType2[is.na(test$BsmtFinType2)] <- "none"
+test$Utilities[is.na(test$Utilities)] <- "none"
+test$Exterior1st[is.na(test$Exterior1st)] <- "none"
+test$Exterior2nd[is.na(test$Exterior2nd)] <- "none"
+test$MasVnrType[is.na(test$MasVnrType)] <- "none"
+test$MasVnrArea[is.na(test$MasVnrArea)] <- "none"
+test$BsmtFinSF1[is.na(test$BsmtFinSF1)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtFullBath[is.na(test$BsmtFullBath)] <- 0
+test$BsmtHalfBath[is.na(test$BsmtHalfBath)] <- 0
+test$BsmtUnfSF[is.na(test$BsmtUnfSF)] <- 0
+test$TotalBsmtSF[is.na(test$TotalBsmtSF)] <- 0
+test$BsmtFinSF2[is.na(test$BsmtFinSF2)] <- 0
+test$BsmtExposure[is.na(test$BsmtExposure)] <- "none"
+
+test$GarageYrBlt[667] <- NA
+test$GarageYrBlt[1117] <- NA
+test$GarageFinish[667] <- NA
+test$GarageFinish[1117] <- NA
+test$GarageQual[667] <- NA
+test$GarageQual[1117] <- NA
+test$GarageCond[667] <- NA
+test$GarageCond[1117] <- NA
+
+test$MasVnrType[index3] <- NA
+
+test$BsmtCond[index4[1]] <- NA
+test$BsmtCond[index4[2]] <- NA
+test$BsmtCond[index4[3]] <- NA
+
+#Change the variables of class "character" to class "factor".
+for(i in 1:ncol(test))
+{
+  if(class(test[[i]]) == "character")
+  {
+    test[[i]] <- as.factor(test[[i]])
+  }
+}
+
+train$GarageYrBlt = as.numeric(train$GarageYrBlt)
+
+##########################################
+### IMPUTE MISSING VALUES FOR TEST SET ###
+##########################################
+
+#Imputed the missing values in the train data using random forests.
+
+imputeTrain2 <- mice(test, m = 5, method = 'rf', seed = 0692)
+
+completedTrain2 <- complete(imputeTrain2, 1)
+
+
